@@ -1,0 +1,14 @@
+# PHP CS Fixer files
+.php_cs.cache
+
+# PHP Unit cache files
+.phpunit.result.cache
+
+# Composer
+vendor/
+
+# PHPStorm files
+.idea/
+
+# Our build folders
+build/
