@@ -80,8 +80,15 @@ class JsonLdWriter
                     $values[$key] = $this->convertItem($value);
                 }
             }
+            /*
+             * Add code to convert image to binary if $name === "image"
+             * 
+             * $values = convertImageUrlToBinary($values);
+             */
+
 
             $result[$name] = $this->extractIfSingle($values);
+
         }
 
         return $result;
@@ -206,5 +213,12 @@ class JsonLdWriter
 
         // Remove the preceeding / from the path.
         return str_replace("/", "", $parts["path"]);
+    }
+
+    protected function convertImageUrlToBinary(string $url): ?string
+    {
+        // Add code to extract and convert image
+
+        return null;
     }
 }
