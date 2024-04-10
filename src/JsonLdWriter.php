@@ -15,13 +15,26 @@ use function Sabre\Uri\parse;
  */
 class JsonLdWriter
 {
+    /** @var bool Allow wirter to download images from URLs to convert them to Base64 Data-URLs. */
+    private $downLoadImagesFromSchema;
+
     /** @var int Time (in seconds) after which getting image for conversion is cancelled. */
-    const FILE_DOWNLOAD_TIMEOUT_WINDOW = 5;
+    private $fileDownloadTimeoutWindow;
 
     /** @var int Max byte-size for images to be downloaded. */
-    const FILE_DOWNLOAD_SIZE_LIMIT = 100000;
+    private $fileDownloadSizeLimit;
 
-    protected $context;
+    private $context;
+
+    public function __construct(
+        $downLoadImagesFromSchema = true,
+        $fileDownloadTimeoutWindow = 5,
+        $fileDownloadSizeLimit = 500000)
+    {
+        $this->downLoadImagesFromSchema = $downLoadImagesFromSchema;
+        $this->fileDownloadTimeoutWindow = $fileDownloadTimeoutWindow;
+        $this->fileDownloadSizeLimit = $fileDownloadSizeLimit;
+    }
 
     /**
      * Exports a list of Items as JSON-LD.
@@ -93,6 +106,10 @@ class JsonLdWriter
              */
 
             $extractedValues = $this->extractIfSingle($values);
+
+            if (!$this->downLoadImagesFromSchema) {
+                continue;
+            }
 
             if ($name == 'thumbnail') {
                 $extractedValues = $this->convertImageToBinary($extractedValues) ?? $extractedValues;
@@ -280,12 +297,31 @@ class JsonLdWriter
         // Set a timeout for the call. 
         $ctx = stream_context_create(array('http'=>
             array(
-                'timeout' => self::FILE_DOWNLOAD_TIMEOUT_WINDOW,
+                'timeout' => $this->fileDownloadTimeoutWindow,
             )
         ));
 
-        $content = file_get_contents($url, true, $ctx, 0, self::FILE_DOWNLOAD_SIZE_LIMIT);
+        $content = file_get_contents($url, true, $ctx, 0, $this->fileDownloadSizeLimit);
 
-        return $content ? 'data:image/jpg;base64,'.base64_encode($content) : null;
+        if (!$content) {
+            return null;
+        }
+
+        $encodedContent = base64_encode($content);
+
+        $mimeTypeSignatures = [
+            'iVBORw0KGgo'=> 'image/png',
+            '/9j/' => 'image/jpg',
+            'R0lGODdh' => 'image/gif',
+            'R0lGODlh'=> 'image/gif'
+        ];
+
+        foreach ($mimeTypeSignatures as $sig => $mimeType) {
+            if (str_starts_with($encodedContent, $sig)) {
+                return 'data:' . $mimeType . ';base64,' . $encodedContent;
+            }
+        }
+
+        return null;
     }
 }
