@@ -15,6 +15,12 @@ use function Sabre\Uri\parse;
  */
 class JsonLdWriter
 {
+    /** @var int Time (in seconds) after which getting image for conversion is cancelled. */
+    const FILE_DOWNLOAD_TIMEOUT_WINDOW = 5;
+
+    /** @var int Max byte-size for images to be downloaded. */
+    const FILE_DOWNLOAD_SIZE_LIMIT = 100000;
+
     protected $context;
 
     /**
@@ -86,8 +92,15 @@ class JsonLdWriter
              * $values = convertImageUrlToBinary($values);
              */
 
+            $extractedValues = $this->extractIfSingle($values);
 
-            $result[$name] = $this->extractIfSingle($values);
+            if ($name == 'thumbnail') {
+                $extractedValues = $this->convertImageToBinary($extractedValues) ?? $extractedValues;
+            } elseif ($name == 'image') {
+                $extractedValues = $this->convertImageToBinary($extractedValues) ?? $extractedValues;
+            }
+
+            $result[$name] = $extractedValues;
 
         }
 
@@ -215,10 +228,64 @@ class JsonLdWriter
         return str_replace("/", "", $parts["path"]);
     }
 
-    protected function convertImageUrlToBinary(string $url): ?string
+    protected function convertImageToBinary(array|string $value): mixed
     {
-        // Add code to extract and convert image
+        // First check if we have a simple url string, an array of images or an ImageObject.
+        if (is_string($value)) {
+            // Simple String that we can convert.
+            return $this->convertUrlToBinary($value) ?? $value;
+        } elseif (is_array($value)) {
+            // Either an ImageObject or an Array of images/ImageObjects.
+            if (array_key_exists('@type', $value)) {
+                // ImageObject, we need to find out which field is filled.
+                return $this->convertImageObjectUrlToBinary($value);
+            } else {
+                // Array of images, so we just call this method on every element.
+                $images = [];
+                foreach ($value as $image) {
+                    $images[] = $this->convertImageToBinary($image);
+                }
+            }
+        }
 
-        return null;
+        return $value;
+    }
+
+    protected function convertImageObjectUrlToBinary(array $imageObject): array {
+        if (array_key_exists('contentUrl', $imageObject))  {
+            $contentUrl = $imageObject['contentUrl'];
+
+            $binary = $this->convertUrlToBinary($contentUrl);
+
+            $imageObject['contentUrl'] = $binary ?? $contentUrl;
+            return $imageObject;
+        } elseif (array_key_exists('url', $imageObject)) {
+            $url = $imageObject['url'];
+            
+            $binary = $this->convertUrlToBinary($url);
+
+            $imageObject['url'] = $binary ?? $url;
+        }
+
+        return $imageObject;
+    }
+
+    protected function convertUrlToBinary($url): ?string {
+        // Check if 
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        // TODO make this configurable.
+        // Set a timeout for the call. 
+        $ctx = stream_context_create(array('http'=>
+            array(
+                'timeout' => self::FILE_DOWNLOAD_TIMEOUT_WINDOW,
+            )
+        ));
+
+        $content = file_get_contents($url, true, $ctx, 0, self::FILE_DOWNLOAD_SIZE_LIMIT);
+
+        return $content ? 'data:image/jpg;base64,'.base64_encode($content) : null;
     }
 }

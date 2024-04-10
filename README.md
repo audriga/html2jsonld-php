@@ -58,6 +58,10 @@ Example usage:
 $result = MarkupUtil::getJsonLdFromUrl("http://example.com")
 ```
 
+### Image Conversion 
+
+Your Markdown content might contain image data. This library will call a URL available in it to convert them to Base64 binary Data-URLs.
+
 ## Development
 ### Installation
 
