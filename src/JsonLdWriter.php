@@ -253,15 +253,18 @@ class JsonLdWriter
             return $this->convertUrlToBinary($value) ?? $value;
         } elseif (is_array($value)) {
             // Either an ImageObject or an Array of images/ImageObjects.
-            if (array_key_exists('@type', $value)) {
+            if (array_key_exists('@type', $value) && $value['@type'] === 'ImageObject') {
                 // ImageObject, we need to find out which field is filled.
                 return $this->convertImageObjectUrlToBinary($value);
-            } else {
-                // Array of images, so we just call this method on every element.
-                $images = [];
-                foreach ($value as $image) {
-                    $images[] = $this->convertImageToBinary($image);
-                }
+            } elseif (array_key_exists('@type', $value)) {
+                // Some other form of image like a Barcode and ImageObjectSnapshot.
+                // See: https://schema.org/ImageObject
+                trigger_error("Image type ". $value['@type'] . " not supported. Image will not be converted.", E_USER_WARNING);
+            }else {
+                // Array of images, so we just call this method on the first element.
+                $firstImage = array_shift($value);
+
+                array_unshift($value, $this->convertImageToBinary($firstImage));
             }
         }
 
@@ -290,7 +293,7 @@ class JsonLdWriter
     protected function convertUrlToBinary($url): ?string {
         // Check if the string is a valid URL.
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            return null;
+            return $url;
         }
 
         // TODO make this configurable.
@@ -304,7 +307,7 @@ class JsonLdWriter
         $content = file_get_contents($url, true, $ctx, 0, $this->fileDownloadSizeLimit);
 
         if (!$content) {
-            return null;
+            return $url;
         }
 
         $encodedContent = base64_encode($content);
@@ -322,6 +325,7 @@ class JsonLdWriter
             }
         }
 
-        return null;
+
+        return $url;
     }
 }
