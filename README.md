@@ -60,7 +60,13 @@ $result = MarkupUtil::getJsonLdFromUrl("http://example.com")
 
 ### Image Conversion 
 
-Your Markdown content might contain image data. This library will call a URL available in it to convert them to Base64 binary Data-URLs.
+Markup content may contain image data in the form of URLs, where these images are stored. By default, this library will call URLs found in this data and convert the content returned by them to Base64 images. You can modify this behaviour by passing in optional parameters while calling any of the above mentioned methods:
+
+* `$downloadImages` - Default is `true`. If set to `false`, image URLs will no longer be accessed and processed.
+
+* `$downloadTimeout` - Default is `5`. This setting will determine the duration in seconds, after which the retrieval will be aborted.
+
+* `$downloadSize` - Default is `500000`. This will limit the size (in Bytes) of the content downloaded from the source.
 
 ## Development
 ### Installation

@@ -288,7 +288,7 @@ class JsonLdWriter
     }
 
     protected function convertUrlToBinary($url): ?string {
-        // Check if 
+        // Check if the string is a valid URL.
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
             return null;
         }
