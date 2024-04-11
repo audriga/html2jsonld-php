@@ -211,4 +211,55 @@ class MarkupUtilTest extends TestCase
         $this->assertArrayHasKey("author", $this->result);
         $this->assertIsArray($this->result["author"]);
     }
+
+    /**
+     * Test website which caused issues for nextcloud/cookbook's import function: hellofresh.de
+     */
+    public function testJsonLdFromHelloFresh(): void
+    {
+        $this->generateResult(__DIR__ . "/../resources/cookbook-issue-hello-fresh.html");
+
+        $this->assertIsArray($this->result);
+        $this->assertCount(2, $this->result);
+
+        $this->assertIsArray($this->result[0]);
+        $this->assertArrayHasKey('@type', $this->result[0]);
+        $this->assertEquals('Recipe', $this->result[0]["@type"]);
+        
+    }
+
+/**
+     * Test website which caused issues for nextcloud/cookbook's import function: marmiton.org
+     */
+    public function testJsonLdFromMarmiton(): void
+    {
+        $this->generateResult(__DIR__ . "/../resources/cookbook-issue-marmiton.html");
+
+        $this->assertIsArray($this->result);
+        $this->assertCount(4, $this->result);
+
+        $this->assertIsArray($this->result[1]);
+        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertEquals('Recipe', $this->result[1]["@type"]);
+
+        fwrite(STDERR, print_r($this->result, true));
+        
+    }
+
+/**
+     * Test website which caused issues for nextcloud/cookbook's import function: rezeptwelt.de
+     */
+    public function testJsonLdFromRezeptwelt(): void
+    {
+        $this->generateResult(__DIR__ . "/../resources/cookbook-issue-rezeptwelt.html");
+
+        $this->assertIsArray($this->result);
+        $this->assertCount(2, $this->result);
+
+
+        $this->assertIsArray($this->result[1]);
+        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertEquals('Recipe', $this->result[1]["@type"]);
+        
+    }
 }
