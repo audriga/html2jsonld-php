@@ -241,9 +241,6 @@ class MarkupUtilTest extends TestCase
         $this->assertIsArray($this->result[1]);
         $this->assertArrayHasKey('@type', $this->result[1]);
         $this->assertEquals('Recipe', $this->result[1]["@type"]);
-
-        fwrite(STDERR, print_r($this->result, true));
-        
     }
 
 /**
