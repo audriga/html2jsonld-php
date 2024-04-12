@@ -10,30 +10,51 @@ use Sabre\Uri\InvalidUriException;
 use function Sabre\Uri\build;
 use function Sabre\Uri\parse;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 /**
  * Exports Items to JSON-LD.
  */
 class JsonLdWriter
 {
-    /** @var bool Allow wirter to download images from URLs to convert them to Base64 Data-URLs. */
-    private $downLoadImagesFromSchema;
+    /**
+     * @var bool Allow wirter to download images from URLs to convert them to
+     * Base64 Data-URLs. 
+     */
+    protected $downLoadImagesFromSchema;
 
-    /** @var int Time (in seconds) after which getting image for conversion is cancelled. */
-    private $fileDownloadTimeoutWindow;
+    /**
+     * @var int Time (in seconds) after which getting image for conversion is
+     * cancelled. 
+     */
+    protected $fileDownloadTimeoutWindow;
 
-    /** @var int Max byte-size for images to be downloaded. */
-    private $fileDownloadSizeLimit;
+    /**
+     * @var int Max byte-size for images to be downloaded. 
+     */
+    protected $fileDownloadSizeLimit;
 
-    private $context;
+    /**
+     * @var LoggerInterface Instance of a Psr's NullLogger 
+     */
+    protected $logger;
+
+    /**
+     * @var string Context of the object(s) being parsed, like 'https://schema.org' 
+     */
+    protected $context;
 
     public function __construct(
         $downLoadImagesFromSchema = true,
         $fileDownloadTimeoutWindow = 5,
-        $fileDownloadSizeLimit = 500000)
-    {
+        $fileDownloadSizeLimit = 500000
+    ) {
         $this->downLoadImagesFromSchema = $downLoadImagesFromSchema;
         $this->fileDownloadTimeoutWindow = $fileDownloadTimeoutWindow;
         $this->fileDownloadSizeLimit = $fileDownloadSizeLimit;
+
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -112,9 +133,13 @@ class JsonLdWriter
             }
 
             if ($name == 'thumbnail') {
-                $extractedValues = $this->convertImageToBinary($extractedValues) ?? $extractedValues;
+                $extractedValues
+                    = $this->convertImageToBinary($extractedValues)
+                    ?? $extractedValues;
             } elseif ($name == 'image') {
-                $extractedValues = $this->convertImageToBinary($extractedValues) ?? $extractedValues;
+                $extractedValues
+                    = $this->convertImageToBinary($extractedValues)
+                    ?? $extractedValues;
             }
 
             $result[$name] = $extractedValues;
@@ -247,20 +272,26 @@ class JsonLdWriter
 
     protected function convertImageToBinary(array|string $value): mixed
     {
-        // First check if we have a simple url string, an array of images or an ImageObject.
+        // First check if we have a simple url string, an array of images
+        // or an ImageObject.
         if (is_string($value)) {
             // Simple String that we can convert.
             return $this->convertUrlToBinary($value) ?? $value;
         } elseif (is_array($value)) {
             // Either an ImageObject or an Array of images/ImageObjects.
-            if (array_key_exists('@type', $value) && $value['@type'] === 'ImageObject') {
+            if (array_key_exists('@type', $value)
+                && $value['@type'] === 'ImageObject'
+            ) {
                 // ImageObject, we need to find out which field is filled.
                 return $this->convertImageObjectUrlToBinary($value);
             } elseif (array_key_exists('@type', $value)) {
                 // Some other form of image like a Barcode and ImageObjectSnapshot.
                 // See: https://schema.org/ImageObject
-                trigger_error("Image type ". $value['@type'] . " not supported. Image will not be converted.", E_USER_WARNING);
-            }else {
+                $this->logger->warning(
+                    "Images of type ". $value['@type']
+                    . " not supported. Image will not be converted."
+                );
+            } else {
                 // Array of images, so we just call this method on the first element.
                 $firstImage = array_shift($value);
 
@@ -271,8 +302,9 @@ class JsonLdWriter
         return $value;
     }
 
-    protected function convertImageObjectUrlToBinary(array $imageObject): array {
-        if (array_key_exists('contentUrl', $imageObject))  {
+    protected function convertImageObjectUrlToBinary(array $imageObject): array
+    {
+        if (array_key_exists('contentUrl', $imageObject)) {
             $contentUrl = $imageObject['contentUrl'];
 
             $binary = $this->convertUrlToBinary($contentUrl);
@@ -290,21 +322,30 @@ class JsonLdWriter
         return $imageObject;
     }
 
-    protected function convertUrlToBinary($url): ?string {
+    protected function convertUrlToBinary($url): ?string
+    {
         // Check if the string is a valid URL.
-        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return $url;
         }
 
         // TODO make this configurable.
         // Set a timeout for the call. 
-        $ctx = stream_context_create(array('http'=>
+        $ctx = stream_context_create(
+            array('http'=>
             array(
                 'timeout' => $this->fileDownloadTimeoutWindow,
             )
-        ));
+            )
+        );
 
-        $content = file_get_contents($url, true, $ctx, 0, $this->fileDownloadSizeLimit);
+        $content = file_get_contents(
+            $url,
+            true,
+            $ctx,
+            0,
+            $this->fileDownloadSizeLimit
+        );
 
         if (!$content) {
             return $url;

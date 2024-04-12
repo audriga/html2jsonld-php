@@ -28,15 +28,16 @@ class MarkupUtil
      * Extract any Schema.org markup information found in the URL source as JSON+LD,
      * Microdata (inline) or RDFA. HTML files are retrieved using php curl.
      * 
-     * @param string $source A string representation of the URL under which the HTML
-     *                       that is to be scanned is located.
-     * @param bool $downloadImages  Use file_get_contents to retreive and convert
-     *                              images found in the markup data to Base64. IF
-     *                              the image could not be retreived, the original
-     *                              URL is returned.
-     * @param int $downloadTimeout  Time in seconds, after which a download will be
-     *                              aborted.
-     * @param int $downloadSize Maximum size in bytes of images when downloading.
+     * @param string $source          A string representation of the URL under which
+     *                                the HTML that is to be scanned is located.
+     * @param bool   $downloadImages  Use file_get_contents to retreive and convert
+     *                                images found in the markup data to Base64. IF
+     *                                the image could not be retreived, the
+     *                                original URL is returned.
+     * @param int    $downloadTimeout Time in seconds, after which a download will be
+     *                                aborted.
+     * @param int    $downloadSize    Maximum size in bytes of images when
+     *                                downloading.
      * 
      * @return string $result A JSON string containing any markup located in the
      * source. If the source contains multiple markup tags, multiple formats of
@@ -51,25 +52,33 @@ class MarkupUtil
     ) {
         $html = self::getHtmlFromURL($source);
 
-        return self::getJsonLdFromHtmlString($html, $source, $downloadImages, $downloadTimeout, $downloadSize);
+        return self::getJsonLdFromHtmlString(
+            $html,
+            $source,
+            $downloadImages,
+            $downloadTimeout,
+            $downloadSize
+        );
     }
 
     /**
      * Extract any Schema.org markup information found in the file source as JSON+LD,
      * Microdata (inline) or RDFA.
      * 
-     * @param string $source A string representation of the file directory under
-     *                       which the HTML that is to be scanned is located.
-     * @param string $url    The original URL source of the file. Used to resolve
-     *                       relative paths in the markup data. The method does
-     *                       not access the URL in any way.
-     * @param bool $downloadImages  Use file_get_contents() to retreive and convert
-     *                              images found in the markup data to Base64. IF
-     *                              the image could not be retreived, the original
-     *                              URL is returned.
-     * @param int $downloadTimeout  Time in seconds, after which a download will be
-     *                              aborted.
-     * @param int $downloadSize Maximum size in bytes of images when downloading.
+     * @param string $source          A string representation of the file directory
+     *                                under which the HTML that is to be scanned is
+     *                                located.
+     * @param string $url             The original URL source of the file. Used to
+     *                                resolve relative paths in the markup data.
+     *                                The method does not access the URL in any way.
+     * @param bool   $downloadImages  Use file_get_contents() to retreive and convert
+     *                                images found in the markup data to Base64. IF
+     *                                the image could not be retreived, the original
+     *                                URL is returned.
+     * @param int    $downloadTimeout Time in seconds, after which a download will be
+     *                                aborted.
+     * @param int    $downloadSize    Maximum size in bytes of images when
+     *                                downloading.
      * 
      * @return string $result A JSON string containing any markup located in the
      * source. If the source contains multiple markup tags, multiple formats of
@@ -82,27 +91,36 @@ class MarkupUtil
         bool $downloadImages= true,
         int $downloadTimeout = 5,
         int $downloadSize = 500000
-        ) {
+    ) {
         $html = self::getHtmlFromFile($source);
 
-        return self::getJsonLdFromHtmlString($html, $url, $downloadImages, $downloadTimeout, $downloadSize);
+        return self::getJsonLdFromHtmlString(
+            $html,
+            $url,
+            $downloadImages,
+            $downloadTimeout,
+            $downloadSize
+        );
     }
 
     /**
      * Extract any Schema.org markup information found in the HTML string as JSON+LD,
      * Microdata (inline) or RDFA.
      * 
-     * @param string $html A string representation of the HTML file to be scanned.
-     * @param string $url  The original URL source of the file. Used to resolve
-     *                     relative paths in the markup data. The method does
-     *                     not access the URL in any way.
-     * @param bool $downloadImages  Use file_get_contents() to retreive and convert
-     *                              images found in the markup data to Base64. IF
-     *                              the image could not be retreived, the original
-     *                              URL is returned.
-     * @param int $downloadTimeout  Time in seconds, after which a download will be
-     *                              aborted.
-     * @param int $downloadSize Maximum size in bytes of images when downloading.
+     * @param string $html            A string representation of the HTML file to be
+     *                                scanned.
+     * @param string $url             The original URL source of the file. Used to
+     *                                resolve
+     *                                relative paths in the markup data. The method
+     *                                does not access the URL in any way.
+     * @param bool   $downloadImages  Use file_get_contents() to retreive and convert
+     *                                images found in the markup data to Base64. IF
+     *                                the image could not be retreived, the original
+     *                                URL is returned.
+     * @param int    $downloadTimeout Time in seconds, after which a download will be
+     *                                aborted.
+     * @param int    $downloadSize    Maximum size in bytes of images when
+     *                                downloading.
      * 
      * @return string $result A JSON string containing any markup located in the
      * source. If the source contains multiple markup tags, multiple formats of
@@ -115,7 +133,7 @@ class MarkupUtil
         bool $downloadImages= true,
         int $downloadTimeout = 5,
         int $downloadSize = 500000
-        ) {
+    ) {
         // TODO / For future reference: we might want to check the HTML source for
         // relevant substrings ("http://schema.org", "<aplication/ld+json>",
         // "itemscope", "vocab", etc.) before building the DomDocument or the
@@ -132,7 +150,12 @@ class MarkupUtil
 
         $items = $readerChain->read($domDocument, $url);
 
-        $jsonLd = self::convertItemArrayToJsonLd($items, $downloadImages, $downloadTimeout, $downloadSize);
+        $jsonLd = self::convertItemArrayToJsonLd(
+            $items,
+            $downloadImages,
+            $downloadTimeout,
+            $downloadSize
+        );
 
         return $jsonLd;
     }
@@ -176,19 +199,24 @@ class MarkupUtil
      * Converts an Item Array to a JSON String, either as a single JSON
      * object or a JSON Array.
      * 
-     * @param ?array $items An Array of Brick\StructuredData\Item objects.
-     * @param bool $downloadImages  Use file_get_contents() to retreive and convert
-     *                              images found in the markup data to Base64. IF
-     *                              the image could not be retreived, the original
-     *                              URL is returned.
-     * @param int $downloadTimeout  Time in seconds, after which a download will be
-     *                              aborted.
-     * @param int $downloadSize Maximum size in bytes of images when downloading.
+     * @param ?array $items           An Array of Brick\StructuredData\Item objects.
+     * @param bool   $downloadImages  Use file_get_contents() to retreive and convert
+     *                                images found in the markup data to Base64. IF
+     *                                the image could not be retreived, the original
+     *                                URL is returned.
+     * @param int    $downloadTimeout Time in seconds, after which a download will be
+     *                                aborted.
+     * @param int    $downloadSize    Maximum size in bytes of images when
+     *                                downloading.
      * 
      * @return string $result The array converted to a JSON string.
      */
-    protected static function convertItemArrayToJsonLd(?array $items, $downloadImages, $downloadTimeout, $downloadSize)
-    {
+    protected static function convertItemArrayToJsonLd(
+        ?array $items,
+        $downloadImages,
+        $downloadTimeout,
+        $downloadSize
+    ) {
         // The Brick/StructuredData Readers return their own custom Item arrays.
         // These can be written to JSON Strings using their writer.
         $writer = new JsonLdWriter($downloadImages, $downloadTimeout, $downloadSize);
