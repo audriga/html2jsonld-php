@@ -10,12 +10,52 @@ use Sabre\Uri\InvalidUriException;
 use function Sabre\Uri\build;
 use function Sabre\Uri\parse;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 /**
  * Exports Items to JSON-LD.
  */
 class JsonLdWriter
 {
+    /**
+     * @var bool Allow wirter to download images from URLs to convert them to
+     * Base64 Data-URLs. 
+     */
+    protected $downLoadImagesFromSchema;
+
+    /**
+     * @var int Time (in seconds) after which getting image for conversion is
+     * cancelled. 
+     */
+    protected $fileDownloadTimeoutWindow;
+
+    /**
+     * @var int Max byte-size for images to be downloaded. 
+     */
+    protected $fileDownloadSizeLimit;
+
+    /**
+     * @var LoggerInterface Instance of a Psr's NullLogger 
+     */
+    protected $logger;
+
+    /**
+     * @var string Context of the object(s) being parsed, like 'https://schema.org' 
+     */
     protected $context;
+
+    public function __construct(
+        $downLoadImagesFromSchema = true,
+        $fileDownloadTimeoutWindow = 5,
+        $fileDownloadSizeLimit = 500000
+    ) {
+        $this->downLoadImagesFromSchema = $downLoadImagesFromSchema;
+        $this->fileDownloadTimeoutWindow = $fileDownloadTimeoutWindow;
+        $this->fileDownloadSizeLimit = $fileDownloadSizeLimit;
+
+        $this->logger = new NullLogger();
+    }
 
     /**
      * Exports a list of Items as JSON-LD.
@@ -86,8 +126,23 @@ class JsonLdWriter
              * $values = convertImageUrlToBinary($values);
              */
 
+            $extractedValues = $this->extractIfSingle($values);
 
-            $result[$name] = $this->extractIfSingle($values);
+            if (!$this->downLoadImagesFromSchema) {
+                continue;
+            }
+
+            if ($name == 'thumbnail') {
+                $extractedValues
+                    = $this->convertImageToBinary($extractedValues)
+                    ?? $extractedValues;
+            } elseif ($name == 'image') {
+                $extractedValues
+                    = $this->convertImageToBinary($extractedValues)
+                    ?? $extractedValues;
+            }
+
+            $result[$name] = $extractedValues;
 
         }
 
@@ -215,10 +270,103 @@ class JsonLdWriter
         return str_replace("/", "", $parts["path"]);
     }
 
-    protected function convertImageUrlToBinary(string $url): ?string
+    protected function convertImageToBinary(array|string $value): mixed
     {
-        // Add code to extract and convert image
+        // First check if we have a simple url string, an array of images
+        // or an ImageObject.
+        if (is_string($value)) {
+            // Simple String that we can convert.
+            return $this->convertUrlToBinary($value) ?? $value;
+        } elseif (is_array($value)) {
+            // Either an ImageObject or an Array of images/ImageObjects.
+            if (array_key_exists('@type', $value)
+                && $value['@type'] === 'ImageObject'
+            ) {
+                // ImageObject, we need to find out which field is filled.
+                return $this->convertImageObjectUrlToBinary($value);
+            } elseif (array_key_exists('@type', $value)) {
+                // Some other form of image like a Barcode and ImageObjectSnapshot.
+                // See: https://schema.org/ImageObject
+                $this->logger->warning(
+                    "Images of type ". $value['@type']
+                    . " not supported. Image will not be converted."
+                );
+            } else {
+                // Array of images, so we just call this method on the first element.
+                $firstImage = array_shift($value);
 
-        return null;
+                array_unshift($value, $this->convertImageToBinary($firstImage));
+            }
+        }
+
+        return $value;
+    }
+
+    protected function convertImageObjectUrlToBinary(array $imageObject): array
+    {
+        if (array_key_exists('contentUrl', $imageObject)) {
+            $contentUrl = $imageObject['contentUrl'];
+
+            $binary = $this->convertUrlToBinary($contentUrl);
+
+            $imageObject['contentUrl'] = $binary ?? $contentUrl;
+            return $imageObject;
+        } elseif (array_key_exists('url', $imageObject)) {
+            $url = $imageObject['url'];
+            
+            $binary = $this->convertUrlToBinary($url);
+
+            $imageObject['url'] = $binary ?? $url;
+        }
+
+        return $imageObject;
+    }
+
+    protected function convertUrlToBinary($url): ?string
+    {
+        // Check if the string is a valid URL.
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+
+        // TODO make this configurable.
+        // Set a timeout for the call. 
+        $ctx = stream_context_create(
+            array('http'=>
+            array(
+                'timeout' => $this->fileDownloadTimeoutWindow,
+            )
+            )
+        );
+
+        $content = file_get_contents(
+            $url,
+            true,
+            $ctx,
+            0,
+            $this->fileDownloadSizeLimit
+        );
+
+        if (!$content) {
+            return $url;
+        }
+
+        $encodedContent = base64_encode($content);
+
+        $mimeTypeSignatures = [
+            'iVBORw0KGgo'=> 'image/png',
+            '/9j/' => 'image/jpg',
+            'R0lGODdh' => 'image/gif',
+            'R0lGODlh'=> 'image/gif'
+        ];
+
+        foreach ($mimeTypeSignatures as $sig => $mimeType) {
+            if (str_starts_with($encodedContent, $sig)) {
+                return 'data:' . $mimeType . ';base64,' . $encodedContent;
+            }
+        }
+
+
+        return $url;
     }
 }

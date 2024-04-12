@@ -97,6 +97,9 @@ class MarkupUtilTest extends TestCase
 
         $this->assertArrayHasKey("author", $this->result);
         $this->assertIsArray($this->result["author"]);
+
+        $this->assertArrayHasKey('image', $this->result);
+        $this->assertStringStartsWith('data:image/jpg;base64,/9j/4AAQSkZJRgABAQEASABIAAD', $this->result['image']);
     }
 
     public function testJsonLdFromArticleZeit(): void
