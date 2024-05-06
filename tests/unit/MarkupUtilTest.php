@@ -237,9 +237,8 @@ class MarkupUtilTest extends TestCase
         
         $this->assertIsArray($this->result);
         $this->assertCount(7, $this->result);
-        print_r($this->result);
-        $this->assertIsArray($this->result[1]);
-        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertIsArray($this->result[4]);
+        $this->assertArrayHasKey('@type', $this->result[4]);
         $this->assertEquals('Recipe', $this->result[4]["@type"]);
         
         
@@ -255,8 +254,8 @@ class MarkupUtilTest extends TestCase
         $this->assertIsArray($this->result);
         $this->assertCount(8, $this->result);
 
-        $this->assertIsArray($this->result[1]);
-        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertIsArray($this->result[7]);
+        $this->assertArrayHasKey('@type', $this->result[7]);
         $this->assertEquals('Recipe', $this->result[7]["@type"]);
         
     }
@@ -270,8 +269,8 @@ class MarkupUtilTest extends TestCase
 
         $this->assertIsArray($this->result);
 
-        $this->assertIsArray($this->result[1]);
-        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertIsArray($this->result[11]);
+        $this->assertArrayHasKey('@type', $this->result[11]);
         $this->assertEquals('Recipe', $this->result[11]["@type"]);
         
     }
@@ -285,8 +284,8 @@ class MarkupUtilTest extends TestCase
 
         $this->assertIsArray($this->result);
 
-        $this->assertIsArray($this->result[1]);
-        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertIsArray($this->result[13]);
+        $this->assertArrayHasKey('@type', $this->result[13]);
         $this->assertEquals('Recipe', $this->result[13]["@type"]);
         
     }
@@ -313,9 +312,9 @@ class MarkupUtilTest extends TestCase
        $this->generateResult(__DIR__ . "/../resources/cookbook-issue-swrfernsehen.html");
 
         $this->assertIsArray($this->result);
-        print_r($this->result);
-        $this->assertArrayHasKey('@type', $this->result);
-        $this->assertEquals('Recipe', $this->result["itemReviewed"]["@type"]);
+
+        $this->assertArrayHasKey('@type', $this->result[1]);
+        $this->assertEquals('Recipe', $this->result[1]["@type"]);
         
     }
 }
