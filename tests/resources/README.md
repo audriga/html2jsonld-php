@@ -20,7 +20,7 @@
 
 * `microdata-inline-website.html` - A basic website containing Microdata markup, inline with the body.
 
-## Realted to other projects
+##  Related to other projects
 
 * `cookbook-issue-hello-fresh.html` - HTML pulled from hellofresh.de, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1509.
 
