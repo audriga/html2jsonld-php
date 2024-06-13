@@ -20,6 +20,16 @@
 
 * `microdata-inline-website.html` - A basic website containing Microdata markup, inline with the body.
 
+##  Related to other projects
+
+* `cookbook-issue-hello-fresh.html` - HTML pulled from hellofresh.de, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1509.
+
+* `cookbook-issue-marmiton.html` - HTML pulled from marmiton.org, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1592.
+
+* `cookbook-issue-rezeptwelt.html` - HTML pulled from rezeptwelt.de, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1508.
+
+
+
 ## Miscellaneous:
 
 * `website-without-markup.html` - https://www.example.com - html without any markup.
