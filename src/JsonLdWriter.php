@@ -287,11 +287,14 @@ class JsonLdWriter
             } elseif (array_key_exists('@type', $value)) {
                 // Some other form of image like a Barcode and ImageObjectSnapshot.
                 // See: https://schema.org/ImageObject
-                $type = !empty($value['@type']) ? (is_string($value['@type']) ? $value['@type'] : json_encode($value['@type'])) : '';
-                $this->logger->warning(
-                    "Images of type ".   $type 
-                    . " not supported. Image will not be converted."
-                );
+                if(empty($value['@type'])){
+                    $this->logger->warning('@type is empty');
+                } else {
+                    $this->logger->warning(
+                        "Images of type ".   $value['@type']
+                        . " not supported. Image will not be converted."
+                    );
+                }
             } else {
                 // Array of images, so we just call this method on the first element.
                 $firstImage = array_shift($value);
