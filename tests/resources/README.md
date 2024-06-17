@@ -28,16 +28,6 @@
 
 * `cookbook-issue-rezeptwelt.html` - HTML pulled from rezeptwelt.de, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1508.
 
-
-
-## Miscellaneous:
-
-* `website-without-markup.html` - https://www.example.com - html without any markup.
-
-* `mixed-jsonld-microdata.html` - A real world example of a website containing both JSON-LD tags, and Microdata, as well as having more than one JSON-LD tag. (Source: https://www.zeit.de/zeit-magazin/2023-06/schokolade-tonys-tafel-genuss)
-
-##  Related to other cookbook issues:
-
 * `resources/cookbook-issue-campbells.html` - HTML pulled from campbells.com, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1647.
 
 * `resources/cookbook-issue-indian-recipie.html` - HTML pulled from vegrecipesofindia.com, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1638.
@@ -51,3 +41,11 @@
 * `resources/cookbooks-issue-backerby-nature.html` - HTML pulled from bakerbynature.com, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1639.
 
 * `resources/cookbooks-issue-holy-cow-vegan.html` - HTML pulled from holycowvegan.net, which caused an issue in [nextcloud/cookbook](https://github.com/nextcloud/cookbook). See: https://github.com/nextcloud/cookbook/issues/1637.
+
+## Miscellaneous:
+
+* `website-without-markup.html` - https://www.example.com - html without any markup.
+
+* `mixed-jsonld-microdata.html` - A real world example of a website containing both JSON-LD tags, and Microdata, as well as having more than one JSON-LD tag. (Source: https://www.zeit.de/zeit-magazin/2023-06/schokolade-tonys-tafel-genuss)
+
+
