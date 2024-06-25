@@ -1,0 +1,62 @@
+{
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    "description": "Rezept des Tages 03.06.15, ein Rezept der Kategorie Salate. Mehr Thermomix",
+    "author": {
+      "@type": "Organization",
+      "name": "THERMOMIX ® REZEPT"
+    },
+    "name": "Krautsalat",
+    "url": "/vorspeisensalate",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.72",
+      "bestRating": "5",
+      "worstRating": "1",
+      "reviewCount": "709"
+    },
+    "datePublished": "2014-06-22",
+    "dateModified": "2017-09-03",
+    "recipeIngredient": [
+      "300 g Grüner Kohl, (äußere Blätter und Strunk entfernt)",
+      "60 g Karotte, geschält",
+      "1 Glas Miracle Whip, (kleines Glas mit 200 ml)",
+      "2 Esslöffel Rapsöl",
+      "2 Esslöffel Apfelessig",
+      "3 Esslöffel Frühlingszwiebel, fein gehackt",
+      "40 g Brauner Zucker",
+      "1 Prise Meersalz"
+    ],
+    "recipeCuisine": "Amerikanisch, USA",
+    "keywords": "einfach, zügig, günstig, frisch, sommerlich, feier, imbiss, picknick, grillfest, salat, vegetarisch, brunch, mittagessen, abendbrot, beilage, amerikanisch, usa",
+    "recipeInstructions": {
+      "@type": "HowToSection",
+      "name": "Ein tolles Rezept",
+      "position": "1",
+      "itemListElement": [
+        {
+          "@type": "HowToStep",
+          "position": "1",
+          "name": "Den Weißen Kohl und die Möhre fein raspeln"
+        },
+        {
+          "@type": "HowToStep",
+          "position": "2",
+          "name": "4-5 Sek./Stufe 4 zerkleinern"
+        },
+        {
+          "@type": "HowToStep",
+          "position": "3",
+          "name": "Alle restlichen Zutaten hinzufügen",
+          "text": ""
+        },
+        {
+          "@type": "HowToStep",
+          "position": "4",
+          "name": "Den Cole Slaw mit Folie oder Deckel abdecken",
+          "text": "Den Cole Slaw mit Folie oder Deckel abdecken."
+        }
+      ]
+    }
+  }
+  

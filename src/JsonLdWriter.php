@@ -288,7 +288,7 @@ class JsonLdWriter
                 // Some other form of image like a Barcode and ImageObjectSnapshot.
                 // See: https://schema.org/ImageObject
                 if(empty($value['@type'])){
-                    $this->logger->warning('@type is empty');
+                    $this->logger->warning('@type is empty. Image will not be converted.');
                 } else {
                     $this->logger->warning(
                         "Images of type ".   $value['@type']
