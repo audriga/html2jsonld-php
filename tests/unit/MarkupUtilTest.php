@@ -222,7 +222,6 @@ class MarkupUtilTest extends TestCase
 
         $this->assertIsArray($this->result);
         $this->assertCount(2, $this->result);
-        var_dump($this->result[0]);
 
         $this->assertIsArray($this->result[0]);
         $this->assertArrayHasKey('@type', $this->result[0]);
