@@ -287,10 +287,14 @@ class JsonLdWriter
             } elseif (array_key_exists('@type', $value)) {
                 // Some other form of image like a Barcode and ImageObjectSnapshot.
                 // See: https://schema.org/ImageObject
-                $this->logger->warning(
-                    "Images of type ". $value['@type']
-                    . " not supported. Image will not be converted."
-                );
+                if(empty($value['@type'])){
+                    $this->logger->warning('@type is empty. Image will not be converted.');
+                } else {
+                    $this->logger->warning(
+                        "Images of type ".   $value['@type']
+                        . " not supported. Image will not be converted."
+                    );
+                }
             } else {
                 // Array of images, so we just call this method on the first element.
                 $firstImage = array_shift($value);
@@ -302,21 +306,39 @@ class JsonLdWriter
         return $value;
     }
 
+
     protected function convertImageObjectUrlToBinary(array $imageObject): array
     {
         if (array_key_exists('contentUrl', $imageObject)) {
             $contentUrl = $imageObject['contentUrl'];
 
+            if (is_string($contentUrl)) {
+            // If contentUrl is a string, convert it to binary
             $binary = $this->convertUrlToBinary($contentUrl);
-
             $imageObject['contentUrl'] = $binary ?? $contentUrl;
-            return $imageObject;
+            } elseif (is_array($contentUrl)) {
+                // If contentUrl is an array, convert each URL in the array to binary
+                foreach ($contentUrl as $key => $url) {
+                    $binary = $this->convertUrlToBinary($url);
+                    $imageObject['contentUrl'][$key] = $binary ?? $url;
+                }
+                
+            } 
+
         } elseif (array_key_exists('url', $imageObject)) {
             $url = $imageObject['url'];
-            
-            $binary = $this->convertUrlToBinary($url);
 
+            if (is_string($url)) {
+            // If url is a string, convert it to binary
+            $binary = $this->convertUrlToBinary($url);
             $imageObject['url'] = $binary ?? $url;
+            } elseif (is_array($url)) {
+                // If url is an array, convert each URL in the array to binary
+                foreach ($url as $key => $imageUrl) {
+                    $binary = $this->convertUrlToBinary($imageUrl);
+                    $imageObject['url'][$key] = $binary ?? $imageUrl;
+                }
+            }
         }
 
         return $imageObject;
